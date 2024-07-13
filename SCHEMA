@@ -1,0 +1,70 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "agendar_reunion_make",
+    "description": "Envía datos básicos de una reunión a Make para agendar en Google Calendar",
+    "version": "v1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://hook.us1.make.com"
+    }
+  ],
+  "paths": {
+    "/onn6rwmb1yb8rcjy7g2m2kud54ncr3s6": {
+      "post": {
+        "summary": "Crear una nueva cita",
+        "operationId": "crearCita",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Cita"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Cita creada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cita"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Accepted"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Cita": {
+        "type": "object",
+        "properties": {
+          "fecha_hora": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha y hora de la reunión (formato ISO 8601, ej: 2024-06-30T09:00:00Z)"
+          },
+          "correo_electronico": {
+            "type": "string",
+            "format": "email",
+            "description": "Correo electrónico del participante"
+          }
+        },
+        "required": [
+          "fecha_hora",
+          "correo_electronico"
+        ]
+      }
+    }
+  }
+}
+
+
