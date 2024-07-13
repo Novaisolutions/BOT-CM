@@ -1,0 +1,3 @@
+Convierte el siguiente{{3.fecha_hora}}{{3.correo_electronico}} texto en un objeto JSON con las claves "summary", "start", "end" y "attendees". La hora de finalización "end" debe ser 30 minutos después de la hora de inicio "start". Toma en cuenta que la zona horaria es la de Tijuana Baja California , esto tómalo en cuenta para "Start" y "end"
+
+Texto: {"value": "{\"fecha_hora\":\"{{3.fecha_hora}}\",\"correo_electronico\":\"{{3.correo_electronico}}\"}", "IMTMETHOD": "POST"}
