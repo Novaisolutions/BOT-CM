@@ -1,0 +1,106 @@
+/**
+ * Agenda una reunión enviando datos a Make para su integración con Google Calendar.
+ * @param {Object} datos - Objeto conteniendo los datos de la reunión.
+ * @param {string} datos.fecha_hora - Fecha y hora de la reunión en formato ISO 8601.
+ * @param {string} datos.correo_electronico - Correo electrónico del participante.
+ * @returns {Promise<Object>} - Promesa que se resuelve con la respuesta de Make.
+ */
+async function agendar_reunion_make({ fecha_hora, correo_electronico }) {
+  const response = await fetch('https://hook.us1.make.com/uj6prjhti9xqk39q3bctg9h2vjbpwksb', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ fecha_hora, correo_electronico })
+  });
+
+
+  if (!response.ok) {
+    throw new Error(`Error: ${response.statusText}`);
+  }
+
+
+  try {
+    return await response.json();
+  } catch (error) {
+    return { message: response.statusText };
+  }
+}
+
+
+const registeredTools = {
+  'agendar_reunion_make': agendar_reunion_make
+};
+
+
+function parseArguments(toolCall) {
+  return JSON.parse(toolCall.function.arguments);
+}
+
+
+function formatToolOutput(toolCallId, output) {
+  return {
+    tool_call_id: toolCallId,
+    output: JSON.stringify(output)
+  };
+}
+
+
+async function handleToolCalls(toolCalls) {
+  return Promise.all(
+    toolCalls.map(async (toolCall) => {
+      const toolName = toolCall.function.name;
+      const toolFunction = registeredTools[toolName];
+
+
+      if (!toolFunction) {
+        throw new ReferenceError(`La herramienta ${toolName} no está implementada`);
+      }
+
+
+      const args = parseArguments(toolCall);
+      const output = await toolFunction(args);
+     
+      console.log(`Se llamó a la herramienta "${toolName}". La salida fue:`, output);
+
+
+      return formatToolOutput(toolCall.id, output);
+    })
+  );
+}
+
+
+async function submitToolOutputs(threadId, runId, openai_key, toolOutputs) {
+  try {
+    const response = await fetch(
+      `https://api.openai.com/v1/threads/${threadId}/runs/${runId}/submit_tool_outputs`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openai_key}`,
+          'OpenAI-Beta': 'assistants=v2'
+        },
+        body: JSON.stringify({ tool_outputs: toolOutputs })
+      }
+    );
+    const data = await response.json();
+    console.log('Respuesta de envío de salida de herramienta:', data);
+  } catch (error) {
+    console.error('Error al enviar las salidas de las herramientas:', error);
+  }
+}
+
+
+async function prepareAndSubmitOutputs() {
+  const toolCalls = workflow.required_action.submit_tool_outputs.tool_calls;
+  const toolOutputs = await handleToolCalls(toolCalls);
+  await submitToolOutputs(workflow.thread_id, workflow.run_id, env.OPENAI_KEY, toolOutputs);
+}
+
+
+// Ejecutar la función principal
+await prepareAndSubmitOutputs();
+
+
+
