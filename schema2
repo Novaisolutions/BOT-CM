@@ -1,0 +1,27 @@
+{
+  "name": "recibir_info_por_correo",
+  "description": "Recibe información de contacto para enviar más detalles por correo electrónico",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "nombre": {
+        "type": "string",
+        "description": "Nombre del interesado"
+      },
+      "numero_telefono": {
+        "type": "string",
+        "description": "Número de teléfono del interesado"
+      },
+      "correo_electronico": {
+        "type": "string",
+        "format": "email",
+        "description": "Correo electrónico del interesado"
+      }
+    },
+    "required": [
+      "nombre",
+      "numero_telefono",
+      "correo_electronico"
+    ]
+  }
+}
